@@ -214,6 +214,8 @@ const server = http.createServer((req, res) => {
   console.log('收到客户端的请求了，请求路径是：' + req.url);
   console.log('请求我的客户端的地址是：', req.socket.remoteAddress + ':' + req.socket.remotePort);
 
+  // 默认会有一个 /favicon.ico 请求
+
   // 对于文本类型的数据，最好都加上编码Content-Type，防止中文解析乱码问题
   if (req.url == '/html') {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -311,7 +313,9 @@ console.log(path.extname('c:/a/b/c/d/hello.txt'))
 
 # 插件
 
-## nodejs自动重启插件nodemon
+## nodemon
+
+> nodejs自动重启插件
 
 **安装**
 ```bash
@@ -337,3 +341,109 @@ Ctrl + C
 nodemon -v # nodemon --version
 ```
 
+## art-template
+
+[官网](http://aui.github.io/art-template/zh-cn/index.html)
+> JavaScript 模板引擎
+> 它采用作用域预声明的技术来优化模板渲染速度，从而获得接近 JavaScript 极限的运行性能，并且同时支持 NodeJS 和浏览器
+> 模板引擎只关心自己认识的{{}} mustache语法,八字胡语法
+
+**安装**
+
+```bash
+npm install art-template --save
+```
+
+### 浏览器中使用
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script src="../node_modules/art-template/lib/template-web.js"></script>
+  <script id="tpl" type="text/template">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+    </head>
+    <body>
+      {{if user}}
+        <h2>{{user.name}}</h2>
+        我喜欢: {{each user.hobbies}}{{$value}} {{/each}}
+      {{/if}}
+    </body>
+    </html>
+  </script>
+  <script>
+    let ret = template('tpl', {
+      user: {
+        name: 'Diff',
+        hobbies: ['熬夜','敲代码']
+      },
+    })
+    console.log(ret);
+  </script>
+</body>
+</html>
+```
+
+### Node中使用
+
+```js
+let template = require('art-template');
+
+let ret = template.render("Hello {{lang}}", {
+  lang: "NodeJs"
+})
+
+console.log(ret);
+```
+
+配合fs和http使用
+
+```js
+const fs = require('fs');
+const http = require('http');
+
+let template = require('art-template');
+
+let port = 3111;
+let hostname = '127.0.0.1';
+
+const server = http.createServer();
+
+server.on('request', (req, res) => {
+  let { url } = req;
+  console.log(url);
+  if (url === '/' || url === '/index') {
+    fs.readFile('./template.html', (error, data) => {
+      if (error) {
+        console.log('读取文件失败', error);
+        return res.end('File Not Found')
+      }
+      data = data.toString();
+      let ret = template.render(data, {
+        lang: 'TypeScript'
+      })
+      res.end(ret);
+    })
+  } else {
+    res.end('404 Not Found');
+  }
+})
+
+server.listen(port, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+})
+
+```

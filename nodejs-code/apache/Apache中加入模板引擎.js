@@ -1,6 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 
+const template = require('art-template');
+
 const hostname = '127.0.0.1';
 const port = 3000;
 
@@ -20,35 +22,25 @@ const server = http.createServer();
 
 
 server.on('request', (req, res) => {
-  fs.readFile(wwwDir + '/template.html', (error, data) => {
+  fs.readFile(wwwDir + '/art-template.html', (error, data) => {
     if (error) {
       res.end('404 Not Found')
       return;
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    
+
     data = data.toString();
     fs.readdir(wwwDir, (error, dirs) => {
       if (error) {
         return res.end('dir Not Found')
       }
-      console.log(dirs);
-      let content = '';
-      dirs.forEach(item => {
-        content += `
-          <tr>
-            <td data-value=".git/"><a class="icon dir" href="/${wwwDir}/${item}/">${item}</a></td>
-            <td class="detailsColumn" data-value="0"></td>
-            <td class="detailsColumn" data-value="1683248429">2023/5/5 09:00:29</td>
-          </tr>
-        `;
+      let htlmStr = template.render(data.toString(), {
+        files: dirs
       })
-      data = data.toString();
-      data = data.replace('xxx', content);
-      res.end(data)
+      res.end(htlmStr)
     })
   })
-  
+
 })
 
 server.listen(port, () => {
