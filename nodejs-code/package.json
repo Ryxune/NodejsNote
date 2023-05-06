@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "art-template": "^4.13.2"
+    "art-template": "^4.13.2",
+    "bootstrap": "^5.2.3"
   }
 }

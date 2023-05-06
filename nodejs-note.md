@@ -249,6 +249,10 @@ server.listen(port, hostname, () => {
 });
 ```
 
+> 注: 项目启动后无法通过ip地址访问,只能通过127.0.0.1:3000访问,因为 Node 服务器只绑定在了本地回环地址 127.0.0.1 上，而没有绑定在可外部访问的 IP 地址上。
+> 将 IP 地址设置为 0.0.0.0，它是一个通配符，表示服务器绑定到所有可用的网络接口地址。这样，在本地访问 http://127.0.0.1:3000 和在其他设备访问 http://(your-ip-address):3000 都可以正常访问了。
+> 或者直接不写hostname,本地就可以通过localhost或ip地址+端口号访问
+
 ## fs & http
 
 ```js
@@ -310,6 +314,90 @@ console.log(os.totalmem())
 // extname extension name
 console.log(path.extname('c:/a/b/c/d/hello.txt'))
 ```
+
+```js
+var url = require('url')
+
+var obj = url.parse('/pinglun?name=的撒的撒&message=的撒的撒的撒', true)
+
+console.log(obj)
+console.log(obj.query)
+```
+
+# 服务端渲染 & 客户端渲染
+
+- 服务端渲染
+  + 说白了就是在服务端使用模板引擎
+  + 模板引擎最早诞生于服务端，后来才发展到了前端
+
+- 服务端渲染和客户端渲染的区别
+  + 客户端渲染不利于 SEO 搜索引擎优化
+  + 服务端渲染是可以被爬虫抓取到的，客户端异步渲染是很难被爬虫抓取到的
+  + 所以你会发现真正的网站既不是纯异步也不是纯服务端渲染出来的，而是两者结合来做的
+  + 例如京东的商品列表就采用的是服务端渲染，目的了为了 SEO 搜索引擎优化
+  + 而它的商品评论列表为了用户体验，而且也不需要 SEO 优化，所以采用是客户端渲染
+
+服务端渲染流程
+![](nodejs-note/2023-05-06-10-17-03.png)
+
+客户端渲染流程
+![](nodejs-note/2023-05-06-10-18-09.png)
+
+## 
+
+# 处理网站中的静态资源
+
+- 为了让目录结构保持统一清晰,约定把所有的HTML文件都放到views(视图)目录
+- 为了方便统一处理静态资源,约定把所有静态资源都存放在public目录
+
+```js
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
+
+const template = require('art-template');
+
+const hostname = '0.0.0.0';
+const port = 3000;
+
+const comments = []
+
+http
+  .createServer((req, res) => {
+    const parseObj = url.parse(req.url, true);
+    const pathname = parseObj.pathname;
+    if (pathname === '/' || pathname === 'index') {
+      fs.readFile('./views/index.html', (error, data) => {
+        if (error) {
+          return res.end('404 Not Found!');
+        }
+        let htmlStr = template.render(data.toString(), {
+          comments
+        });
+        res.end(htmlStr);
+      })
+    } else if (pathname.indexOf('/public/') === 0) {
+      fs.readFile('.' + pathname, (error, data) => {
+        if (error) {
+          return res.end('404 Not Found!');
+        }
+        res.end(data);
+      })
+    } else {
+      res.end('404 Not Found!');
+    }
+  })
+  .listen(port, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
+  })
+```
+
+# Node中的控制台
+
+> cmd为Node环境的控制台
+
+- 可以使用JS中的ECMAScript
+- Node中的控制台,核心模块可以直接使用不需要引入
 
 # 插件
 
@@ -417,7 +505,7 @@ const http = require('http');
 
 let template = require('art-template');
 
-let port = 3111;
+let port = 3000;
 let hostname = '127.0.0.1';
 
 const server = http.createServer();
