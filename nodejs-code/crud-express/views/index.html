@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="/node_modules/bootstrap/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>用户管理</title>
+    <style>
+      html {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="">
+      <h1 class="text-center">用户管理</h1>
+      <a
+        id="popoverButton"
+        type="button"
+        class="btn btn-primary btn-lg"
+        href="/users/new"
+      >
+        添加用户
+    </a>
+      <form action="/">
+        <table class="table table-striped mt-4">
+          <thead>
+            <tr>
+              <th scope="col">id</th>
+              <th scope="col">姓名</th>
+              <th scope="col">性别</th>
+              <th scope="col">爱好</th>
+              <th scope="col">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ each users }}
+            <tr>
+              <th scope="row">{{ $value.id}}</th>
+              <td>{{ $value.name }}</td>
+              <td>{{ $value.gender == 0 ? '男' : '女' }}</td>
+              <td>{{ $value.hobbies }}</td>
+              <td>
+                <a href="/users/edit?id={{$value.id}}" class="btn btn-info btn-sm">编辑</a>
+                <a href="/users/delete?id={{$value.id}}" class="btn btn-danger btn-sm">删除</a>
+              </td>
+            </tr>
+            {{ /each }}
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </body>
+</html>
